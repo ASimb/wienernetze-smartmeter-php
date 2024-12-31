@@ -5,47 +5,54 @@ Read energy-consumption from Wiener Netze Smartmeters.
 new ViennaSmartmeter(username, password, [debug=true/false])
 
 ## Available functions:
-login()               ... does the login with Wiener Netze webpage credentials
-                          returns "true" if successful, otherwise "false"
-getProfile()          ... get your profile info
-                          returns:
-                            stdClass Object
-                            (
-                                [id] => 00000
-                                [salutation] => Herr
-                                [lastname] => Mustermann
-                                [firstname] => Max
-                                [email] => max.mustermann@mustermail.com
-                                [defaultGeschaeftspartnerRegistration] => stdClass Object
-                                    (
-                                        [id] => 000000
-                                        [registrationKey] => 000000000000
-                                        [zaehlpunkt] => AT0000000000000000000000000000000   // meterpoint
-                                        [status] => CONFIRMED
-                                        [geschaeftspartner] => 0000000000                   // customerid
-                                        [completedAt] => 2000-12-24T18:00:00.000Z
-                                    )
-                                [isZpsDonee] => 
-                                [registration] => stdClass Object
-                                    (
-                                        [zaehlpunkt] => AT0000000000000000000000000000000
-                                    )
-                            )
- welcome()              ... get all Infos on the welcome-page
-                            returns:
-                            stdClass Object
-        //                            (
-        //                                [meterReadings] => Array
-        //                                    (
-        //                                        [0] => stdClass Object
-        //                                            (
-        //                                                [value] => 0               // current value of smartmeter
-        //                                                [type] => 1-2:1.8.0
-        //                                                [validated] => 1
-        //                                                [date] => 2024-12-24T18:00:00.000Z
-        //                                            )
-        //                                    )
-        //                            )
+- login()  
+  does the login with Wiener Netze webpage credentials
+  returns "true" if successful, otherwise "false"
+- getProfile()
+  get your profile info  
+  returns:
+  ```
+  stdClass Object
+      (
+      [id] => 00000
+      [salutation] => Herr
+      [lastname] => Mustermann
+      [firstname] => Max
+      [email] => max.mustermann@mustermail.com
+      [defaultGeschaeftspartnerRegistration] => stdClass Object
+          (
+          [id] => 000000
+          [registrationKey] => 000000000000
+          [zaehlpunkt] => AT0000000000000000000000000000000   // meterpoint
+          [status] => CONFIRMED
+          [geschaeftspartner] => 0000000000                   // customerid
+          [completedAt] => 2000-12-24T18:00:00.000Z
+          )
+      [isZpsDonee] => 
+      [registration] => stdClass Object
+          (
+          [zaehlpunkt] => AT0000000000000000000000000000000
+          )
+      )
+  ```
+ - welcome()  
+   get all Infos on the welcome-page  
+   returns:
+   ```
+   stdClass Object
+       (
+       [meterReadings] => Array
+           (
+           [0] => stdClass Object
+               (
+               [value] => 0               // current value of smartmeter
+               [type] => 1-2:1.8.0
+               [validated] => 1
+               [date] => 2024-12-24T18:00:00.000Z
+               )
+           )
+       )
+    ```
         // getConsumptionData(meterpoint, customerid, start_time, end_time, role, aggregate)
         //                        ... get energy-consumption for the period between start_time and end_time
         //                            start_time/end_time must have format yyyy-mm-dd hh:mm:ss (e.g. 2024-12-24 18:30:00)
