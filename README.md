@@ -143,7 +143,7 @@ __new ViennaSmartmeter(username, password, [debug=true/false])__
   deletes an event by id. The id is returned with getEvents().
 - __getLimits()__
   get limits set by the user   
-  returns an array of all created limits. Each element of this list has an entry
+  returns an array of all created limits. Each element of this list has an entry live this:  
   ```
   [resourceLocation] => https://service.wienernetze.at/rest/smp/1.0/m/radar/benachrichtigung/12345678
   ```
