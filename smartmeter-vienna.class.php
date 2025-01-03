@@ -180,7 +180,6 @@
 				$params .= "&".$key."=".urlencode($val);
 			}
 			$login_url = $this->AUTHURL . "auth?" . substr($params, 1, strlen($params));
-                        echo "<br><br><br>";
 
 			$ch = curl_init ($login_url);
 			curl_setopt($ch, CURLOPT_HEADER, true);
