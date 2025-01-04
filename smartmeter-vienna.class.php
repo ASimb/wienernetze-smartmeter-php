@@ -1,6 +1,149 @@
 <?php
-	class ViennaSmartmeter{
+         
+        define("LogPath", "/var/");
 
+        //  object constructor:
+        //  new ViennaSmartmeter(username, password, [debug=true/false])
+        //
+        //  available functions:
+        //  login()               ... does the login with Wiener Netze webpage credentials
+        //                            returns "true" if successful, otherwise "false"
+        //  getProfile()          ... get your profile info
+        //                            returns:
+        //                            stdClass Object
+        //                            (
+        //                                [id] => 00000
+        //                                [salutation] => Herr
+        //                                [lastname] => Mustermann
+        //                                [firstname] => Max
+        //                                [email] => max.mustermann@mustermail.com
+        //                                [defaultGeschaeftspartnerRegistration] => stdClass Object
+        //                                    (
+        //                                        [id] => 000000
+        //                                        [registrationKey] => 000000000000
+        //                                        [zaehlpunkt] => AT0000000000000000000000000000000   // meterpoint
+        //                                        [status] => CONFIRMED
+        //                                        [geschaeftspartner] => 0000000000                   // customerid
+        //                                        [completedAt] => 2000-12-24T18:00:00.000Z
+        //                                    )
+        //                                [isZpsDonee] => 
+        //                                [registration] => stdClass Object
+        //                                    (
+        //                                        [zaehlpunkt] => AT0000000000000000000000000000000
+        //                                    )
+        //                            )
+        // welcome()              ... get all Infos on the welcome-page
+        //                            returns:
+        //                            stdClass Object
+        //                            (
+        //                                [meterReadings] => Array
+        //                                    (
+        //                                        [0] => stdClass Object
+        //                                            (
+        //                                                [value] => 0               // current value of smartmeter
+        //                                                [type] => 1-2:1.8.0
+        //                                                [validated] => 1
+        //                                                [date] => 2024-12-24T18:00:00.000Z
+        //                                            )
+        //                                    )
+        //                            )
+        // getConsumptionData(meterpoint, customerid, start_time, end_time, role, aggregate)
+        //                        ... get energy-consumption for the period between start_time and end_time
+        //                            start_time/end_time must have format yyyy-mm-dd hh:mm:ss (e.g. 2024-12-24 18:30:00)
+        //                            aggregate has the possible values NONE (period is 15-minutes), SUM_PER_DAY (period is 1 day) 
+        //                            role has the possible values V001 (period as selected for aggregate), V002 (period is 15-minutes anyway) 
+        //                            returns an object, which consists of two parts:
+        //                            part 1: "descriptor"
+        //                            stdClass Object
+        //                                    (
+        //                                        [geschaeftspartnernummer] => 0000000000                   // customerid
+        //                                        [zaehlpunktnummer] => AT0000000000000000000000000000000   // meterpoint
+        //                                        [rolle] => V001
+        //                                        [aggregat] => NONE
+        //                                        [granularitaet] => D
+        //                                        [einheit] => KWH
+        //                                    )
+        //                            part 2: "values" including an array of objects. Each object represents the measurements of the required period:
+        //                            stdClass Object
+        //                                    (
+        //                                        [wert] => 0.043                           // value of consumption in kWh for the period
+        //                                        [zeitpunktVon] => 2024-12-27T08:00:00Z
+        //                                        [zeitpunktBis] => 2024-12-27T08:15:00Z
+        //                                        [geschaetzt] => 
+        //                                    )
+        // getConsumptionByDay(meterpoint, customerid, startingday, [startingtime])
+        //                        ... get energy-consumption by startingday
+        //                            startingday must have the format yyyy-mm-dd
+        //                            startingtime must have the format hh:mm (parameter is optional)
+        //                            IMPORTANT: this function is obsolete and is implemented for compatibility reasons only.
+        //                                       please use getConsumptionData()
+        //                            returns an array of objects. Each object represents the measurements of the required period:
+        //                            stdClass Object
+        //                                    (
+        //                                        [value] => 304                           // value of consumption in Wh (!) for the period
+        //                                        [timestamp] => 2024-12-27T08:00:00Z
+        //                                    )
+        // getMeasurements(profile, start_date, end_date, type)
+        //                        ... get energy-consumption for the period between start_day and end_day
+        //                            start_date/end_date must have the format yyyy-mm-dd
+        //                            type has the possible values QUARTER_HOUR, DAY, METER_READ
+        //                            returns:
+        //                            stdClass Object
+        //                            (
+        //                                [zaehlwerke] => Array
+        //                                    (
+        //                                        [0] => stdClass Object
+        //                                            (
+        //                                                [obisCode] => 1-1:1.9.0
+        //                                                [einheit] => WH
+        //                                                [messwerte] => Array
+        //                                                    (
+        //                                                        [0] => stdClass Object
+        //                                                            (
+        //                                                                [messwert] => 113
+        //                                                                [zeitVon] => 2024-12-21T23:00:00.000Z
+        //                                                                [zeitBis] => 2024-12-21T23:15:00.000Z
+        //                                                                [qualitaet] => VAL
+        //                                                            )
+        //                            
+        //                                                        [1] => stdClass Object
+        //                                                            (
+        //                                                                [messwert] => 144
+        //                                                                [zeitVon] => 2024-12-21T23:15:00.000Z
+        //                                                                [zeitBis] => 2024-12-21T23:30:00.000Z
+        //                                                                [qualitaet] => VAL
+        //                                                            )
+        //                                                        [3] => ........
+        //                                                    )
+        //                                            )
+        //                                    )
+        //                                [zaehlpunkt] => AT0000000000000000000000000000000   // meterpoint
+        //                            )
+        // getEvents(meterpoint, start, end)
+        //                        ... get events limited by start and end parameters
+        //                            start/end must have the format yyyy-mm-dd hh:mm:ss
+        //                            returns an array of events
+        // createEvent(meterpoint, name, start, end)
+        //                        ... create an event
+        // deleteEvent(id)        ... deletes an event by id. The id is returned with getEvents().
+        // getLimits()            ... get limits set by the user 
+        //                            returns an array of all created limits       
+        //                            each element of this list has an entry
+        //                            [resourceLocation] => https://service.wienernetze.at/rest/smp/1.0/m/radar/benachrichtigung/12345678
+        //                            The number at the end of this url is the ID
+        // createLimit(name, end, period, threshold, type, meterpoint, customerid)
+        //                        ... create new Limit
+        //                            end must have the format yyyy-mm-dd hh:mm:ss
+	//                            period can take d or m for day or month.
+	//                            threshold in Watt per Hour, not kWh
+	//                            type can take lt ( less than ) and gt ( greater than)
+        // deleteLimit(id)        ... delete limit. The id is returned with getLimits() or createLimit()
+        // getNotifications(limit, order): 
+        //                        ... gets notifications limited by $limit and ordered by $order.
+        // getMeterPoints()       ... gets all Meterpoints assinged to your account ( full detail ).
+        //                            returns an array containing an object for each meterpoint with all available data
+
+	class ViennaSmartmeter{
 		private $username;
 		private $password;
 		private $AUTHURL;
@@ -16,10 +159,6 @@
 			$this->AUTHURL = "https://log.wien/auth/realms/logwien/protocol/openid-connect/";
 			$this->API_URL_WSTW_B2C = "https://api.wstw.at/gateway/WN_SMART_METER_PORTAL_API_B2C/1.0/";
 			$this->API_URL_WSTW_B2B = "https://api.wstw.at/gateway/WN_SMART_METER_PORTAL_API_B2B/1.0/";
-			//10.04.2023 URL Change 
-			//Old one:
-			//$this->API_URL_WN = "https://service.wienernetze.at/rest/smp/1.0/";
-			//New one:
 			$this->API_URL_WN = "https://service.wienernetze.at/sm/api/";
 
 			$this->access_token = "";
@@ -54,8 +193,23 @@
 			$action = str_replace('action="', '', $matches[0]);
 			$action = str_replace("&amp;", "&", substr($action, 0, strlen($action)-1));
 
+                        // 30.12.24 login procedure adopted
+			$ch = curl_init();
+			curl_setopt($ch, CURLOPT_URL, $action);
+			curl_setopt($ch, CURLOPT_HEADER, 1);	
+			curl_setopt($ch, CURLOPT_POST, 1);
+			curl_setopt($ch, CURLOPT_COOKIE, $cookieData);
+			curl_setopt($ch, CURLOPT_POSTFIELDS,"username=".$this->username); 
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+			$content = curl_exec($ch);
+			curl_error($ch);
+			curl_close ($ch);
 
-			//print_r($action);
+			$matches = array();
+			preg_match('/action="(.*)"/', $content, $matches);
+			$action = str_replace('action="', '', $matches[0]);
+			$action = str_replace("&amp;", "&", substr($action, 0, strlen($action)-1));
 
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $action);
@@ -69,8 +223,6 @@
 			curl_error($ch);
 			curl_close ($ch);
 
-			//print_r($content);
-
 			if(!strstr($content, "Location:")){
 				//echo "Login Error.<br />";
 			}else{
@@ -81,8 +233,6 @@
 			preg_match('/code=(.*)/', $content, $matches);
 			$code = trim(str_replace("code=", "", $matches[0]));
 
-			//print_r($code);
-
 			$data = array(
 				"code" => $code,
 				"grant_type" => "authorization_code",
@@ -90,15 +240,10 @@
 				"redirect_uri" => "https://www.wienernetze.at/wnapp/smapp/"
 			);
 
-			//print_r($data);
-
-
 			$headers = array(
 				'Content-Type: application/x-www-form-urlencoded;charset=UTF-8',
 				'Accept: application/x-www-form-urlencoded'
 			);
-
-			//print_r($headers);
 
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $this->AUTHURL."token");
@@ -111,8 +256,6 @@
 			$content = curl_exec($ch);
 			echo curl_error($ch);
 			curl_close ($ch);
-
-			//print_r($content);
 
 			$parts = explode("\r\n\r\n", $content);
 			$body = json_decode($parts[1]);
@@ -136,14 +279,16 @@
 				if($params){
 					$append = "?";
 					foreach($params as $key=>$val){
-						$append .= "".$key."=".$val."&";
+						$append .= "".$key."=".urlencode($val)."&";
 					}
 					substr($append, 0, strlen($append)-1);
 					$url = $url.$append;
 				}
 			}
 
-			//print_r($headers);
+                        $fh = fopen (LogPath."smartmeter-vienna-wn.log", "w");
+                        fwrite($fh, "REQUEST:\r\n".$url."\r\n");
+
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_HEADER, true);
 			if($method=="GET"){
@@ -152,6 +297,7 @@
 				$headers[] = "Content-Type: application/json";
 				curl_setopt($ch, CURLOPT_POST, 1);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+                                fwrite($fh, json_encode($params)."\r\n");                                
 			}elseif($method="DELETE"){
 				 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
 			}
@@ -166,6 +312,9 @@
 
 			$header = substr($content, 0, $header_size);
 			$body = substr($content, $header_size);
+                        fwrite ($fh, "\r\n\r\n-------------------------------\r\nRESPONSE:\r\n\r\n");
+                        fwrite ($fh, $body);
+                        fclose ($fh);
 
 			return json_decode($body);
 		}
@@ -183,14 +332,15 @@
 				if($params){
 					$append = "?";
 					foreach($params as $key=>$val){
-						$append .= "".$key."=".$val."&";
+						$append .= "".$key."=".urlencode($val)."&";
 					}
 					substr($append, 0, strlen($append)-1);
 					$url = $url.$append;
 				}
 			}
 
-			//print_r($url);
+                        $fh = fopen (LogPath."smartmeter-vienna-wstwb2c.log", "w");
+                        fwrite($fh, "REQUEST:\r\n".$url."\r\n");
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_HEADER, true);
 			if($method == "GET"){
@@ -201,6 +351,7 @@
 				$headers[] = "Content-Type: application/json";
 				curl_setopt($ch, CURLOPT_POST, 1);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+                                fwrite($fh, json_encode($params)."\r\n");                                
 			}
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -213,7 +364,9 @@
 
 			$header = substr($content, 0, $header_size);
 			$body = substr($content, $header_size);
-
+                        fwrite ($fh, "\r\n\r\n-------------------------------\r\nRESPONSE:\r\n\r\n");
+                        fwrite ($fh, $body);
+                        fclose ($fh);
 			return json_decode($body);
 		}
 		
@@ -231,14 +384,15 @@
 				if($params){
 					$append = "?";
 					foreach($params as $key=>$val){
-						$append .= "".$key."=".$val."&";
+						$append .= "".$key."=".urlencode($val)."&";
 					}
 					substr($append, 0, strlen($append)-1);
 					$url = $url.$append;
 				}
 			}
 
-			//print_r($url);
+                        $fh = fopen (LogPath."smartmeter-vienna-wstwb2b.log", "w");
+                        fwrite($fh, "REQUEST:\r\n".$url."\r\n");
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_HEADER, true);
 			if($method == "GET"){
@@ -249,6 +403,7 @@
 				$headers[] = "Content-Type: application/json";
 				curl_setopt($ch, CURLOPT_POST, 1);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
+                                fwrite($fh, json_encode($params)."\r\n");                                
 			}
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -259,9 +414,11 @@
 			if($this->debug)
 				print_r($content);
 
+                        fwrite ($fh, "\r\n\r\n-------------------------------\r\nRESPONSE:\r\n\r\n");
 			$header = substr($content, 0, $header_size);
 			$body = substr($content, $header_size);
-
+                        fwrite ($fh, $body);
+                        fclose ($fh);
 			return json_decode($body);
 		}
 
@@ -291,80 +448,53 @@
 			$endpoint = "zaehlpunkte";
 			$result = $this->wstwb2c($endpoint, null);
 
-			if(sizeof($result)<=0){
-				$return = false;
-			}elseif(sizeof($result)==1){
-				$result = $result[0]->zaehlpunkte;
-			}
-			
+			$result = $result[0]->zaehlpunkte;
 			return $result;
 		}
-
-		public function getMeterPointIds(){
-			$endpoint = "zaehlpunkte";
-			$result = $this->wstwb2c($endpoint, null);
-
-			$meterpoints = array();
-
-			foreach($result as $customer){
-				foreach($customer->zaehlpunkte as $meterpoint){
-					$meterpoints[] = $meterpoint->zaehlpunktnummer;
-				}
-			}
-			return $meterpoints;
+	
+		public function getConsumptionData($meterpoint, $customerid, $start_time, $end_time, $rolle="V002", $aggregate="NONE"){
+                        $start_time = $this->formatDate($start_time, "start");
+                        $end_time = $this->formatDate($end_time, "end");
+			$endpoint = "/user/messwerte/bewegungsdaten";
+			$params = array(
+                                "geschaeftspartner" => $customerid,
+                                "zaehlpunktnummer" => $meterpoint,
+                                "rolle" => $rolle,
+				"zeitpunktVon" => $start_time,
+				"zeitpunktBis" => $end_time,
+				"aggregate" => $aggregate,
+			);
+			$return = $this->wn($endpoint, $params);
+			return $return;
 		}
 
-		/* Does no longer work. 25.11.2023
-		public function getConsumption($meterpoint, $start, $end){
-			//Date Format: "%Y-%m-%dT%H:%M:%S.%f"
-			$start = str_replace(" ", "T", $start).".000Z";
-			$end = str_replace(" ", "T", $end).".999Z";
-
-			$endpoint = "messdaten/zaehlpunkt/".$meterpoint."/verbrauch";
-			$params = array(
-				"dateFrom" => $start,
-				"dateTo" => $end,
-				"period" => "DAY",
-				"dayViewResolution" => "QUARTER-HOUR",
-				"offset" => "0",
-				"accumulate" => "false"
-			);
-			$return = $this->wstwb2c($endpoint, $params);
-
-			// WN API always returns 24h. Filter result and return only whats needed.
-			$values = array();
-			foreach($return->values as $item){
-				if(strtotime($item->timestamp) >= strtotime($start) && strtotime($item->timestamp) <= strtotime($end)){
-					$values[] = $item;
-				}
-			}
-			return $values;
-		}*/
-		
-		public function getConsumptionByDay($meterpoint, $customerid, $day){
-			$day = $day."T00:00:00.000Z";
-			$endpoint = "messdaten/".$customerid."/".$meterpoint."/verbrauch";
-			$params = array(
-				"dateFrom" => $day,
-				"period" => "DAY",
-				"dayViewResolution" => "QUARTER-HOUR",
-				"offset" => "0",
-				"accumulate" => "false"
-			);
-			$return = $this->wstwb2c($endpoint, $params);
-			// WN API always returns 24h. Filter result and return only whats needed.
-			return $return->values;
+                // function is obsolete, for compatibility reasons only
+                // 30.12.24 function completely revised by using another endpoint
+		public function getConsumptionByDay($meterpoint, $customerid, $day, $time="00:00:00"){
+			$day = $day." ".$time;
+                        $end_day = new DateTime($day);
+                        $end_day->modify('+1 day');
+                        $end_day->modify('-1 second');
+                        $end_day = $end_day->format("Y-m-d H:i:s");   
+                        $values = $this->getConsumptionData($meterpoint, $customerid, $day, $end_day)->values;
+                        //the following lines convert to the old format for compatibility reasons
+                        $return = array();
+                        foreach($values as $value)
+                          {
+                          $return[] = (object) array("timestamp"=>($value->zeitpunktVon), "value"=>(1000*$value->wert));
+                          }
+			return $return;
 		}
-		
-		public function getMeasurements($meterpoint, $customerid, $start, $end, $type){
+
+		public function getMeasurements($me, $start, $end, $type){
 			//Date Format: "%Y-%m-%d"
 			//Type: QUARTER_HOUR, DAY, METER_READ
 			//Info: datumVon / datumBis need to be at least 2 days apart.
 
-			$endpoint = "zaehlpunkte/".$customerid."/".$meterpoint."/messwerte";
+			$endpoint = "zaehlpunkte/".$me->defaultGeschaeftspartnerRegistration->geschaeftspartner."/".$me->defaultGeschaeftspartnerRegistration->zaehlpunkt."/messwerte";
 
 			$params = array(
-				"zaehlpunkt" => $meterpoint,
+				"zaehlpunkt" => $me->defaultGeschaeftspartnerRegistration->zaehlpunkt,
 				"datumVon" => $start,
 				"datumBis" => $end,
 				"wertetyp" => $type
@@ -437,7 +567,7 @@
 			return $this->wstwb2c($endpoint, null, $method);
 		}
 
-		public function createLimit($name, $end, $period, $threshold, $type, $meterpoint){
+		public function createLimit($name, $end, $period, $threshold, $type, $meterpoint, $customerid){
 			$end = $this->formatDate($end, "end");
 			//period can take d or m for day or month.
 			if($period == "d") $period = "DAY";
@@ -447,7 +577,7 @@
 			if($type == "lt") $type = "FALLING_BELOW";
 			else $type = "EXCEEDING";
 
-			$endpoint = "radar/benachrichtigung";
+			$endpoint = "radar/kundennummer/".$customerid."/benachrichtigung";
 			$method = "POST";
 			$params = array(
 				"name" => $name,
@@ -492,3 +622,4 @@
 		}
 
 	}
+?>
