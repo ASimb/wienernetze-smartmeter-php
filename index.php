@@ -50,16 +50,3 @@ if ($sm->login()) {
 ?>
 
 </pre>
-	//print_r($res);
-
-	//$limit = $sm->createLimit("APILIMIT", "2022-10-31 23:59:59", "d", "10000", "gt", $me->registration->zaehlpunkt);
-	//print_r($limit);
-
-	//$limits = $sm->getLimits();
-	//print_r($limits);
-
-	//$res = $sm->deleteLimit("12678965");
-	//print_r($res);
-
-	//$notifications = $sm->getNotifications("50", "DESC");
-	//print_r($notifications);
