@@ -211,17 +211,23 @@
 			$action = str_replace('action="', '', $matches[0]);
 			$action = str_replace("&amp;", "&", substr($action, 0, strlen($action)-1));
 
-			$ch = curl_init();
-			curl_setopt($ch, CURLOPT_URL, $action);
-			curl_setopt($ch, CURLOPT_HEADER, 1);	
-			curl_setopt($ch, CURLOPT_POST, 1);
-			curl_setopt($ch, CURLOPT_COOKIE, $cookieData);
-			curl_setopt($ch, CURLOPT_POSTFIELDS,"username=".$this->username."&password=".$this->password); 
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-			curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
-			$content = curl_exec($ch);
-			curl_error($ch);
-			curl_close ($ch);
+                        // 04.01.24 login procedure adopted for chapta-check
+                        $cnt=3;
+                        do {
+                          sleep(3);
+			  $ch = curl_init();
+			  curl_setopt($ch, CURLOPT_URL, $action);
+			  curl_setopt($ch, CURLOPT_HEADER, 1);	
+			  curl_setopt($ch, CURLOPT_POST, 1);
+			  curl_setopt($ch, CURLOPT_COOKIE, $cookieData);
+			  curl_setopt($ch, CURLOPT_POSTFIELDS,"username=".$this->username."&password=".$this->password); 
+			  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			  curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+			  $content = curl_exec($ch);
+			  curl_error($ch);
+			  curl_close ($ch);
+                          $cnt++;
+                        } while (($cnt<4) && (!strstr($content, "Location:")));
 
 			if(!strstr($content, "Location:")){
 				//echo "Login Error.<br />";
@@ -259,7 +265,6 @@
 
 			$parts = explode("\r\n\r\n", $content);
 			$body = json_decode($parts[1]);
-
 			if(!$body->error){
 				$this->access_token = $body->access_token;
 				return true;
