@@ -262,7 +262,7 @@
 
 			$parts = explode("\r\n\r\n", $content);
 			$body = json_decode($parts[1]);
-			if(!$body->error){
+			if(!isset($body->error)){
 				$this->access_token = $body->access_token;
 				return true;
 			}
@@ -288,8 +288,11 @@
 				}
 			}
 
-                        $fh = fopen (LogPath."smartmeter-vienna-wn.log", "w");
-                        fwrite($fh, "REQUEST:\r\n".$url."\r\n");
+			if($this->debug)
+                            {  
+                            $fh = fopen (LogPath."smartmeter-vienna-wn.log", "w");
+                            fwrite($fh, "REQUEST:\r\n".$url."\r\n");
+                            }
 
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_HEADER, true);
@@ -299,9 +302,9 @@
 				$headers[] = "Content-Type: application/json";
 				curl_setopt($ch, CURLOPT_POST, 1);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-                                fwrite($fh, json_encode($params)."\r\n");                                
+                                if($this->debug) fwrite($fh, json_encode($params)."\r\n");                                
 			}elseif($method="DELETE"){
-				 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+				curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
 			}
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -309,15 +312,14 @@
 			$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 			curl_close($ch);
 
-			if($this->debug)
-				print_r($content);
-
 			$header = substr($content, 0, $header_size);
 			$body = substr($content, $header_size);
-                        fwrite ($fh, "\r\n\r\n-------------------------------\r\nRESPONSE:\r\n\r\n");
-                        fwrite ($fh, $body);
-                        fclose ($fh);
-
+			if($this->debug)
+                            {  
+                            fwrite ($fh, "\r\n\r\n-------------------------------\r\nRESPONSE:\r\n\r\n");
+                            fwrite ($fh, $body);
+                            fclose ($fh);
+                            }
 			return json_decode($body);
 		}
 
@@ -341,8 +343,11 @@
 				}
 			}
 
-                        $fh = fopen (LogPath."smartmeter-vienna-wstwb2c.log", "w");
-                        fwrite($fh, "REQUEST:\r\n".$url."\r\n");
+ 			if($this->debug)
+                            {
+                            $fh = fopen (LogPath."smartmeter-vienna-wstwb2c.log", "w");
+                            fwrite($fh, "REQUEST:\r\n".$url."\r\n");
+                            }
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_HEADER, true);
 			if($method == "GET"){
@@ -353,7 +358,7 @@
 				$headers[] = "Content-Type: application/json";
 				curl_setopt($ch, CURLOPT_POST, 1);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-                                fwrite($fh, json_encode($params)."\r\n");                                
+                                if($this->debug) fwrite($fh, json_encode($params)."\r\n");                                
 			}
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -361,14 +366,14 @@
 			$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 			curl_close($ch);
 
-			if($this->debug)
-				print_r($content);
-
 			$header = substr($content, 0, $header_size);
 			$body = substr($content, $header_size);
-                        fwrite ($fh, "\r\n\r\n-------------------------------\r\nRESPONSE:\r\n\r\n");
-                        fwrite ($fh, $body);
-                        fclose ($fh);
+			if($this->debug)
+                            {  
+                            fwrite ($fh, "\r\n\r\n-------------------------------\r\nRESPONSE:\r\n\r\n");
+                            fwrite ($fh, $body);
+                            fclose ($fh);
+                            }
 			return json_decode($body);
 		}
 		
@@ -393,8 +398,11 @@
 				}
 			}
 
-                        $fh = fopen (LogPath."smartmeter-vienna-wstwb2b.log", "w");
-                        fwrite($fh, "REQUEST:\r\n".$url."\r\n");
+ 			if($this->debug)
+                            {
+                            $fh = fopen (LogPath."smartmeter-vienna-wstwb2b.log", "w");
+                            fwrite($fh, "REQUEST:\r\n".$url."\r\n");
+                            }
 			$ch = curl_init($url);
 			curl_setopt($ch, CURLOPT_HEADER, true);
 			if($method == "GET"){
@@ -405,7 +413,7 @@
 				$headers[] = "Content-Type: application/json";
 				curl_setopt($ch, CURLOPT_POST, 1);
 				curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($params));
-                                fwrite($fh, json_encode($params)."\r\n");                                
+                                if($this->debug) fwrite($fh, json_encode($params)."\r\n");                                
 			}
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -413,14 +421,14 @@
 			$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 			curl_close($ch);
 
-			if($this->debug)
-				print_r($content);
-
-                        fwrite ($fh, "\r\n\r\n-------------------------------\r\nRESPONSE:\r\n\r\n");
 			$header = substr($content, 0, $header_size);
 			$body = substr($content, $header_size);
-                        fwrite ($fh, $body);
-                        fclose ($fh);
+			if($this->debug)
+                            {  
+                            fwrite ($fh, "\r\n\r\n-------------------------------\r\nRESPONSE:\r\n\r\n");
+                            fwrite ($fh, $body);
+                            fclose ($fh);
+                            }
 			return json_decode($body);
 		}
 
